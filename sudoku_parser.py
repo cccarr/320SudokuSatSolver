@@ -25,6 +25,7 @@ class SudokuParser(object):
         cols = '123456789'
         cells = [row + column for row in rows for column in cols]
         print(cells)
+        #TODO: Ensure that wildcard characters ar accounted for.
         #for char in puzzle_str:
         return
 
