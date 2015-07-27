@@ -29,6 +29,7 @@ class SudokuParser(object):
         cols = '123456789'
         cells = [row + column for row in rows for column in cols]
         #print(cells)
+        #TODO: Ensure that wildcard characters ar accounted for.
         #for char in puzzle_str:
         return cells
 
@@ -71,17 +72,23 @@ class SudokuParser(object):
                 for d in range(1, 10):
                     value = self.get_base_nine_num(i, j, d)
                     line += str(value) + ' '
-        return line.split(' ')
+                line += str(0)
+                print(line)
 
     def row_clause(self):
         line = ''
         for i in range(1, 10):
-            for j in range(1, 10):
+            for j in range(1, 9):
                 for l in range(j+1,10):
+                    line = ''
                     for d in range(1, 10):
-                        value = self.get_base_nine_num(i, j, d)
-                        line += str(value) + ' ' + '-'
-        #print(line)
+                        value1 = self.get_base_nine_num(i, j, d)
+                        value2 = self.get_base_nine_num(i, l, d)
+                        line += '-' + str(value1) \
+                                + ' ' + '-'+str(value2) \
+                                + ' ' + str(0) + '\n'
+                    #Put value in cnf file to be fed to minisat here
+                    print(line)
 
 sudoku = SudokuParser()
 
@@ -103,12 +110,6 @@ for item in encoded:
      decoded.extend(sudoku.decode(int(item)))
 
 print(decoded)
-
-		
-
-
-
-
 
 
 
