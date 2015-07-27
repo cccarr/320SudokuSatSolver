@@ -90,7 +90,7 @@ puzzle = sudoku.get_sudoku_puzzle()
 table = sudoku.create_variable_table(puzzle)
 sudoku.row_clause()
 base_nine = sudoku.element_clauses()
-encoded = sudoku.encode(puzzle)
+encoded = []
 
 
 
