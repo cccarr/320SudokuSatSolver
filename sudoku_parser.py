@@ -9,8 +9,8 @@ class SudokuParser(object):
         self.var_table = dict()
 
     def get_sudoku_puzzle(self):
-        #filename = sys.argv[1]
-        filename = 'hard95.txt'
+        filename = sys.argv[1]
+        #filename = 'hard95.txt'
         print("the file name is:", filename)
         file = open(filename)
         initial_puzzle = file.readline()
@@ -47,10 +47,10 @@ class SudokuParser(object):
             for j in range(1, 10):
                 for l in range(j+1,10):
 
-                line = ''
-                for d in range(1, 10):
-                    value = self.get_base_nine_num(i, j, d)
-                    line += str(value) + ' ' + '-'+str
+                    line = ''
+                    for d in range(1, 10):
+                        value = self.get_base_nine_num(i, j, d)
+                        line += str(value) + ' ' + '-'+str
 
                 print(line)
 
