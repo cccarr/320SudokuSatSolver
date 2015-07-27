@@ -39,20 +39,22 @@ class SudokuParser(object):
                 for d in range(1, 10):
                     value = self.get_base_nine_num(i, j, d)
                     line += str(value) + ' '
-
+                line += str(0)
                 print(line)
 
     def row_clause(self):
         for i in range(1, 10):
-            for j in range(1, 10):
+            for j in range(1, 9):
                 for l in range(j+1,10):
-
-                line = ''
-                for d in range(1, 10):
-                    value = self.get_base_nine_num(i, j, d)
-                    line += str(value) + ' ' + '-'+str
-
-                print(line)
+                    line = ''
+                    for d in range(1, 10):
+                        value1 = self.get_base_nine_num(i, j, d)
+                        value2 = self.get_base_nine_num(i, l, d)
+                        line += '-' + str(value1) \
+                                + ' ' + '-'+str(value2) \
+                                + ' ' + str(0) + '\n'
+                    #Put value in cnf file to be fed to minisat here
+                    print(line)
 
 sudoku = SudokuParser()
 
@@ -60,5 +62,6 @@ puzzle = sudoku.get_sudoku_puzzle()
 
 sudoku.create_variable_table(puzzle)
 sudoku.element_clauses()
+sudoku.row_clause()
 
 
