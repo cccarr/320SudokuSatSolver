@@ -41,7 +41,7 @@ class SudokuParser(object):
     
     def encode(self, puzzle):
         table = sudoku.create_variable_table(puzzle)
-	encoded = []
+	    encoded = []
         for n, item in enumerate(puzzle):
             nums = list(table[n])
             i = int(nums[0])
@@ -57,12 +57,12 @@ class SudokuParser(object):
         num = ((val % 81) % 9)
         col = (((val % 81) - num) / 9)
         row = ((val - col - num) / 81)
-	k = num + 1
-	j = col + 1
+	    k = num + 1
+	    j = col + 1
         i = row + 1
         cell = str(i) + str(j)  
-	decoded.append(cell)
-	decoded.append(k)
+	    decoded.append(cell)
+	    decoded.append(k)
         return decoded
 
     def element_clauses(self):
