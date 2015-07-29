@@ -66,10 +66,10 @@ class SudokuParser(object):
                 for l in range(j+1, 10):
                     line = ''
                     for d in range(1, 10):
-                        value1 = self.get_base_nine_num(i, j, d)
-                        value2 = self.get_base_nine_num(i, l, d)
-                        line += '-' + str(value1) \
-                                + ' ' + '-'+str(value2) \
+                        literal1 = self.get_base_nine_num(i, j, d)
+                        literal2 = self.get_base_nine_num(i, l, d)
+                        line += '-' + str(literal1) \
+                                + ' ' + '-'+str(literal2) \
                                 + ' ' + str(0) + '\n'
                     #TODO: Eventually output this to our cnf file
                     #print(line)
@@ -84,14 +84,17 @@ class SudokuParser(object):
                 for b in range(0, 3):
                     for u in range(1, 4):
                         for v in range(1, 3):
+                            line = ''
                             for w in range(v+1, 4):
                                 val1 = (3*a) + u
                                 val2 = (3*b) + v
-                                base9_value_1 = self.get_base_nine_num(val1,
-                                                                       val2, d)
+                                literal1 = self.get_base_nine_num(val1,
+                                                                  val2, d)
                                 val2 = (3*b) + w
-                                base9_value_2 = self.get_base_nine_num(val1,
-                                                                       val2, d)
+                                literal2 = self.get_base_nine_num(val1,
+                                                                  val2, d)
+                                line +=
+
 
 
 
