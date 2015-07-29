@@ -19,9 +19,9 @@ class SudokuParser(object):
         for n, item in enumerate(puzzle):
             if item == '.':
                 puzzle[n] = '0'
-        print("".join(puzzle))
+        #print("".join(puzzle))
         str_length = len(initial_puzzle)
-        print(str_length)
+        #print(str_length)
         return puzzle
 
     def create_variable_table(self, puzzle_str):
@@ -73,7 +73,7 @@ class SudokuParser(object):
                     value = self.get_base_nine_num(i, j, d)
                     line += str(value) + ' '
                 line += str(0)
-                print(line)
+                #print(line)
 
     def row_clause(self):
         line = ''
@@ -88,7 +88,20 @@ class SudokuParser(object):
                                 + ' ' + '-'+str(value2) \
                                 + ' ' + str(0) + '\n'
                     #Put value in cnf file to be fed to minisat here
-                    print(line)
+                    #print(line)
+    
+    def format_output(self, inputFile):
+        result = []
+        for line in infile:
+            lines = line.split(' ')
+            for item in lines:
+                item = item.strip('\n')
+                if item == 'SAT':
+                    continue
+                if int(item) <= 0:
+                    continue
+                result.append(int(item))
+        return(result)
 
 sudoku = SudokuParser()
 
@@ -104,9 +117,19 @@ encoded = sudoku.encode(puzzle)
 outfile = open('output.txt', 'w')
 for item in encoded:    
     outfile.write(str(item) + ' 0\n')
-print(encoded)
+
+#Read file
+infile = open('exampleoutput.txt', 'r')
+
+result = sudoku.format_output(infile)
+
+#remove negative
+#decode
+
+print(result)
 decoded = []
-for item in encoded:
+
+for item in result:
      decoded.extend(sudoku.decode(int(item)))
 
 print(decoded)
