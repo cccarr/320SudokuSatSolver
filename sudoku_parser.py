@@ -15,10 +15,15 @@ class SudokuParser(object):
         file = open(filename)
         initial_puzzle = file.readline()
         initial_puzzle = initial_puzzle.strip()
-        puzzle = list(initial_puzzle)
+	    puzzle = list(initial_puzzle)
+        #Handle Wildcards
         for n, item in enumerate(puzzle):
             if item == '.':
                 puzzle[n] = '0'
+            if item == '?':
+                puzzle[n] = '0'
+            if item == '*':
+                puzzle[n] = '0'	
         #print("".join(puzzle))
         str_length = len(initial_puzzle)
         #print(str_length)
@@ -108,6 +113,25 @@ class SudokuParser(object):
         #TODO: Eventually output this to our cnf file
         #print(line) # for testing
 
+    def column_clause(self):
+        """
+
+        :return:
+        """
+        line = ''
+        for i in range(1, 9):
+            for j in range(1, 10):
+                for l in range(i+1, 10):
+                    line = ''
+                    for d in range(1, 10):
+                        literal1 = self.get_base_nine_num(i, j, d)
+                        literal2 = self.get_base_nine_num(i, l, d)
+                        line += '-' + str(literal1) \
+                                + ' ' + '-'+str(literal2) \
+                                + ' ' + str(0) + '\n'
+                    #TODO: Eventually output this to our cnf file
+                    #print(line)
+
     def sub_grid_clause(self):
         """
 
@@ -167,6 +191,7 @@ class SudokuParser(object):
                 result.append(int(item))
         return result
 
+
 sudoku = SudokuParser()
 
 puzzle = sudoku.get_sudoku_puzzle()
@@ -174,8 +199,9 @@ puzzle = sudoku.get_sudoku_puzzle()
 #table = sudoku.create_variable_table(puzzle)
 sudoku.element_clauses()
 sudoku.row_clause()
+sudoku.column_clause()
 sudoku.sub_grid_clause()
-#base_nine = sudoku.element_clauses()
+base_nine = sudoku.element_clauses()
 encoded = sudoku.encode(puzzle)
 
 
