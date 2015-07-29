@@ -16,9 +16,14 @@ class SudokuParser(object):
         initial_puzzle = file.readline()
         initial_puzzle = initial_puzzle.strip()
 	puzzle = list(initial_puzzle)
+        #Handle Wildcards
         for n, item in enumerate(puzzle):
             if item == '.':
                 puzzle[n] = '0'
+            if item == '?':
+                puzzle[n] = '0'
+            if item == '*':
+                puzzle[n] = '0'	
         #print("".join(puzzle))
         str_length = len(initial_puzzle)
         #print(str_length)
