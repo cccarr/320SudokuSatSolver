@@ -111,22 +111,40 @@ class SudokuParser(object):
 
         :return:
         """
-        for d in range(1, 10):
+
+    for d in range(1, 10):
             for a in range(0, 3):
                 for b in range(0, 3):
                     for u in range(1, 4):
                         for v in range(1, 3):
                             line = ''
-                            for w in range(v+1, 4):
+                            for w in range(v + 1, 4):
                                 val1 = (3*a) + u
                                 val2 = (3*b) + v
-                                literal1 = self.get_base_nine_num(val1,
+                                val3 = (3*b) + w
+                                lit1 = self.get_base_nine_num(val1, val2, d)
+                                lit2 = self.get_base_nine_num(val1, val2, d)
+                                literals = "-{0} -{1}".format(lit1, lit2)
+                                line += literals
+
+    for d in range(1, 10):
+            for a in range(0, 3):
+                for b in range(0, 3):
+                    for u in range(1, 3):
+                        for v in range(1, 4):
+                            line = ''
+                            for w in range(u + 1, 4):
+                                for t in range(1, 4):
+                                    val1 = (3*a) + u
+                                    val2 = (3*b) + v
+                                    val3 = (3*b) + w
+                                    lit1 = self.get_base_nine_num(val1,
                                                                   val2, d)
-                                val2 = (3*b) + w
-                                literal2 = self.get_base_nine_num(val1,
+                                    lit2 = self.get_base_nine_num(val1,
                                                                   val2, d)
-                                line += 0
-    
+                                    literals = "-{0} -{1}".format(lit1, lit2)
+                                    line += literals
+
     def format_output(self, inputFile):
         result = []
         for line in infile:
