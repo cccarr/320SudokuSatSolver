@@ -1,6 +1,7 @@
 __author__ = 'Maryam Lantana'
 
-import sys
+import sys, os
+from subprocess import call
 
 
 class SudokuParser(object):
@@ -78,7 +79,7 @@ class SudokuParser(object):
         decoded.append(k)
         return decoded
 
-    def element_clauses(self):
+    def element_clauses(self, outputCNFfile):
         """
 
         :return:
@@ -94,8 +95,9 @@ class SudokuParser(object):
                 line += '0\n'
         #TODO: Eventually output this to our cnf file
         #print(line) # for testing
+        outputCNFfile.write(line)
 
-    def row_clause(self):
+    def row_clause(self, outputCNFfile):
         """
 
         :return:
@@ -112,8 +114,9 @@ class SudokuParser(object):
                         line += literals
         #TODO: Eventually output this to our cnf file
         #print(line) # for testing
+        outputCNFfile.write(line)
 
-    def column_clause(self):
+    def column_clause(self, outputCNFfile):
         """
 
         :return:
@@ -129,10 +132,10 @@ class SudokuParser(object):
                         line += '-' + str(literal1) \
                                 + ' ' + '-'+str(literal2) \
                                 + ' ' + str(0) + '\n'
-                    #TODO: Eventually output this to our cnf file
+                    outputCNFfile.write(line)
                     #print(line)
 
-    def sub_grid_clause(self):
+    def sub_grid_clause(self, outputCNFfile):
         """
 
         :return:
@@ -191,17 +194,31 @@ class SudokuParser(object):
                 result.append(int(item))
         return result
 
+    def run_minisat(self, inputfile, outputfile):
+        #TEMP VALUE REPLACE ./Minisat WITH PATH VARIABLE
+	curdir = os.getcwd()
+        minisatexe = curdir + "/MiniSat_v1.14_linux"
+        print(minisatexe)
+        call([minisatexe, inputfile, outputfile,])
+
 
 sudoku = SudokuParser()
 
 puzzle = sudoku.get_sudoku_puzzle()
 
-#table = sudoku.create_variable_table(puzzle)
-sudoku.element_clauses()
-sudoku.row_clause()
-sudoku.column_clause()
-sudoku.sub_grid_clause()
-base_nine = sudoku.element_clauses()
+table = sudoku.create_variable_table(puzzle)
+#Open temporary file to store CNF form and temp file to store MiniSAT output
+tempinput = open('tempCNF.txt', 'w')
+tempoutput = open('tempSAToutput.txt', 'a')
+#Write clauses to CNF File
+base_nine = sudoku.element_clauses(tempinput)
+sudoku.row_clause(tempinput)
+sudoku.column_clause(tempinput)
+sudoku.sub_grid_clause(tempinput)
+
+#Run MiniSat to temp output file
+sudoku.run_minisat("tempCNF.txt", "tempSAToutput.txt")
+
 encoded = sudoku.encode(puzzle)
 
 
