@@ -1,22 +1,24 @@
 __author__ = 'Maryam Lantana'
 
-import sys, os
+import os
+import sys
 from subprocess import call
 
 
 class SudokuParser(object):
 
     def __init__(self):
-        self.var_table = dict()
+        self.no_of_variables = 0
+        self.no_of_clauses = 0
 
     def get_sudoku_puzzle(self):
         #filename = sys.argv[1]
         filename = 'hard95.txt'
-        print("the file name is: " + filename)
         file = open(filename)
         initial_puzzle = file.readline()
         initial_puzzle = initial_puzzle.strip()
-	    puzzle = list(initial_puzzle)
+        puzzle = list(initial_puzzle)
+
         #Handle Wildcards
         for n, item in enumerate(puzzle):
             if item == '.':
@@ -25,19 +27,12 @@ class SudokuParser(object):
                 puzzle[n] = '0'
             if item == '*':
                 puzzle[n] = '0'	
-        #print("".join(puzzle))
+        #print("".join(puzzle)) #testing
         str_length = len(initial_puzzle)
-        #print(str_length)
+        #print(str_length) #testing
         return puzzle
 
-    def create_variable_table(self, puzzle_str):
-        rows = '123456789'
-        cols = '123456789'
-        cells = [row + column for row in rows for column in cols]
-        #print(cells)
-        #TODO: Ensure that wildcard characters ar accounted for.
-        #for char in puzzle_str:
-        return cells
+
 
     def get_base_nine_num(self, row, col, val):
         """
@@ -52,17 +47,29 @@ class SudokuParser(object):
 
         digit = 81*(row-1)+9*(col-1)+(val-1)+1
         return digit
-    
-    def encode(self, puzzle):
-        table = sudoku.create_variable_table(puzzle)
+
+    def create_variable_table(self):
+        rows = '123456789'
+        cols = '123456789'
+        cells = [row + column for row in rows for column in cols]
+        return cells
+
+    def encode(self, puzzle, output_cnf_file):
+        table = self.create_variable_table()
         encoded = []
+        line = ''
         for n, item in enumerate(puzzle):
             nums = list(table[n])
             i = int(nums[0])
             j = int(nums[1])
             if item == '0':
                 continue
-            encoded.append(sudoku.get_base_nine_num(i, j, int(item)))
+            else:
+                var = self.get_base_nine_num(i, j, int(item))
+                line += '{} 0\n'.format(var)
+                self.no_of_clauses += 1
+                encoded.append(self.get_base_nine_num(i, j, int(item)))
+        output_cnf_file.write(line)
         return encoded
 
     def decode(self, val):
@@ -196,30 +203,32 @@ class SudokuParser(object):
 
     def run_minisat(self, inputfile, outputfile):
         #TEMP VALUE REPLACE ./Minisat WITH PATH VARIABLE
-	curdir = os.getcwd()
-        minisatexe = curdir + "/MiniSat_v1.14_linux"
-        print(minisatexe)
-        call([minisatexe, inputfile, outputfile,])
+        #curdir = os.getcwd()
+        #minisatexe = curdir + "/MiniSat_v1.14_linux"
+        #print(minisatexe)
+        #call([minisatexe, inputfile, outputfile,])
+        return
 
+# File for storing the CNF form
+tempinput = open('tempCNF.txt', 'w')
 
 sudoku = SudokuParser()
 
 puzzle = sudoku.get_sudoku_puzzle()
 
-table = sudoku.create_variable_table(puzzle)
-#Open temporary file to store CNF form and temp file to store MiniSAT output
-tempinput = open('tempCNF.txt', 'w')
 tempoutput = open('tempSAToutput.txt', 'a')
-#Write clauses to CNF File
-base_nine = sudoku.element_clauses(tempinput)
+
+# Encode Sudoku puzzle and write clauses to CNF File
+encoded = sudoku.encode(puzzle, tempinput)
+sudoku.element_clauses(tempinput)
 sudoku.row_clause(tempinput)
 sudoku.column_clause(tempinput)
 sudoku.sub_grid_clause(tempinput)
 
-#Run MiniSat to temp output file
+# Run MiniSat to temp output file
 sudoku.run_minisat("tempCNF.txt", "tempSAToutput.txt")
 
-encoded = sudoku.encode(puzzle)
+
 
 
 
