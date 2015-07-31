@@ -11,14 +11,16 @@ class SudokuParser(object):
         self.no_of_variables = 0
         self.no_of_clauses = 0
 
-    def get_sudoku_puzzle(self):
+    def get_sudoku_puzzle(self, filename):
         """
 
         :return:
         """
-        #filename = sys.argv[1]
-        filename = 'hard95.txt'
-        file = open(filename)
+	try:
+            file = open(filename)
+        except:
+            print("Input Filename Invalid: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
+            exit(1)
         initial_puzzle = file.readline()
         initial_puzzle = initial_puzzle.strip()
         puzzle = list(initial_puzzle)
@@ -241,36 +243,85 @@ class SudokuParser(object):
         :return:
         """
         result = []
-        for line in infile:
+        for line in inputFile:
             lines = line.split(' ')
             for item in lines:
                 item = item.strip('\n')
                 if item == 'SAT':
                     continue
+		if item == 'UNSAT':
+                    continue	
                 if int(item) <= 0:
                     continue
                 result.append(int(item))
         return result
 
-    def run_minisat(self, inputfile, outputfile):
+    def output_sudoku(self, result):
         """
 
         :param inputfile:
-        :param outputfile:
         :return:
         """
-        #TEMP VALUE REPLACE ./Minisat WITH PATH VARIABLE
-        curdir = os.getcwd()
-        minisatexe = curdir + "/MiniSat_v1.14_linux"
-        #print(minisatexe)
-        call([minisatexe, inputfile, outputfile,])
+        #remove negative
+        #decode
+
+        print(result)
+        decoded = []
+
+        for item in result:
+            decoded.extend(sudoku.decode(int(item)))
+
+        print(decoded)
+
+
+
+    def run_minisat(self, inputfile, outputfile, minisatpath):
+        """
+        Runs the MiniSAT executable
+        :param inputfile:   The name of the file that minisat gets input from
+        :param outputfile:  The name of the temporary file that minisat outputs to
+	:param minisatpath: The path to the minisat executable
+        :return:
+        """
+        try:
+            call([minisatpath, inputfile, outputfile,])
+        except:
+            print("MiniSAT path Invalid: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
+            exit(1)
         return
+
+#Check CommandLine for ouput filename and minisat path
+try:
+    if (len(sys.argv[1]) > 1):
+        filename = sys.argv[1]
+except:
+    print("No Input File found: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
+    exit(1)
+try:
+    if (len(sys.argv[2]) > 1):
+        outfile = sys.argv[2]
+        try:
+            outputfile = open(outfile, 'w')
+        except:
+            print("Output Filename Invalid: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
+            exit(1)
+except:
+    print("No Output File found: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
+    exit(1)
+try:
+    if (len(sys.argv[3]) >1):
+        minisatpath = sys.argv[3]
+except:
+    print("MiniSAT path not found: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
+    exit(1)
 
 # File for storing the CNF form
 tempinput = open('tempCNF.txt', 'r+')
 
 sudoku = SudokuParser()
-puzzle = sudoku.get_sudoku_puzzle()
+puzzle = sudoku.get_sudoku_puzzle(filename)
+
+
 
 # Encode Sudoku puzzle and write clauses to CNF File
 encoded = sudoku.encode(puzzle, tempinput)
@@ -284,28 +335,18 @@ finalinput = open('FinalCNFClauses.txt', 'w')
 sudoku.create_minisat_input_file(tempinput, finalinput)
 
 # Run MiniSat to temp output file
-tempoutput = open('tempSAToutput.txt', 'a')
-sudoku.run_minisat("FinalCNFClauses.txt", "tempSAToutput.txt")
+tempoutput = open('tempSAToutput.txt', 'w+')
+sudoku.run_minisat("FinalCNFClauses.txt", "tempSAToutput.txt", minisatpath)
 
-outfile = open('output.txt', 'w')
+#outfile = open('output.txt', 'w')
 for item in encoded:    
-    outfile.write(str(item) + ' 0\n')
+    outputfile.write(str(item) + ' 0\n')
+    result = sudoku.format_output(tempoutput)
+
+sudoku.output_sudoku(result)
 
 #Read file
-infile = open('exampleoutput.txt', 'r')
-
-result = sudoku.format_output(infile)
-
-#remove negative
-#decode
-
-print(result)
-decoded = []
-
-for item in result:
-     decoded.extend(sudoku.decode(int(item)))
-
-print(decoded)
+#infile = open('exampleoutput.txt', 'r')
 
 
 
