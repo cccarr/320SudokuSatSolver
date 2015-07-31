@@ -33,9 +33,7 @@ class SudokuParser(object):
                 puzzle[n] = '0'
             if item == '*':
                 puzzle[n] = '0'	
-        #print("".join(puzzle)) #testing
         str_length = len(initial_puzzle)
-        #print(str_length) #testing
         return puzzle
 
 
@@ -242,6 +240,8 @@ class SudokuParser(object):
         :return:
         """
         result = []
+        inputFile.flush()
+        inputFile.seek(0)
         for line in inputFile:
             lines = line.split(' ')
             for item in lines:
@@ -255,7 +255,7 @@ class SudokuParser(object):
                 result.append(int(item))
         return result
 
-    def output_sudoku(self, result):
+  #  def output_sudoku(self, result):
         """
 
         :param inputfile:
@@ -264,14 +264,11 @@ class SudokuParser(object):
         #remove negative
         #decode
 
-        print(result)
-        decoded = []
+   #     print(result)
+    #    decoded = []
 
-        for item in result:
-            decoded.extend(sudoku.decode(int(item)))
-
-        print(decoded)
-
+     #   for item in result:
+      #      decoded.extend(sudoku.decode(int(item))
 
 
     def run_minisat(self, inputfile, outputfile, minisatpath):
@@ -338,11 +335,21 @@ tempoutput = open('tempSAToutput.txt', 'w+')
 sudoku.run_minisat("FinalCNFClauses.txt", "tempSAToutput.txt", minisatpath)
 
 #outfile = open('output.txt', 'w')
-for item in encoded:    
-    outputfile.write(str(item) + ' 0\n')
-    result = sudoku.format_output(tempoutput)
+#for item in encoded:    
+#    outputfile.write(str(item) + ' 0\n')
+result = sudoku.format_output(tempoutput)
 
-sudoku.output_sudoku(result)
+print(result)
+decoded = []
+
+for item in result:
+    decoded.extend(sudoku.decode(int(item))
+
+#print(decoded)
+
+
+
+#sudoku.output_sudoku(result)
 
 #Read file
 #infile = open('exampleoutput.txt', 'r')
