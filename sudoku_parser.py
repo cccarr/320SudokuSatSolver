@@ -12,6 +12,10 @@ class SudokuParser(object):
         self.no_of_clauses = 0
 
     def get_sudoku_puzzle(self):
+        """
+
+        :return:
+        """
         #filename = sys.argv[1]
         filename = 'hard95.txt'
         file = open(filename)
@@ -49,12 +53,22 @@ class SudokuParser(object):
         return digit
 
     def create_variable_table(self):
+        """
+
+        :return:
+        """
         rows = '123456789'
         cols = '123456789'
         cells = [row + column for row in rows for column in cols]
         return cells
 
     def encode(self, puzzle, output_cnf_file):
+        """
+
+        :param puzzle:
+        :param output_cnf_file:
+        :return:
+        """
         table = self.create_variable_table()
         encoded = []
         line = ''
@@ -73,6 +87,11 @@ class SudokuParser(object):
         return encoded
 
     def decode(self, val):
+        """
+
+        :param val:
+        :return:
+        """
         decoded = []
         val = val - 1
         num = ((val % 81) % 9)
@@ -89,6 +108,7 @@ class SudokuParser(object):
     def element_clauses(self, outputCNFfile):
         """
 
+        :param outputCNFfile:
         :return:
         """
         #print("Element Clauses") # for testing
@@ -97,16 +117,18 @@ class SudokuParser(object):
             for j in range(1, 10):
                 for d in range(1, 10):
                     value = self.get_base_nine_num(i, j, d)
+                    self.no_of_variables += 1
                     new_val = '{} '.format(value)
                     line += new_val
                 line += '0\n'
-        #TODO: Eventually output this to our cnf file
+                self.no_of_clauses += 1
         #print(line) # for testing
         outputCNFfile.write(line)
 
     def row_clause(self, outputCNFfile):
         """
 
+        :param outputCNFfile:
         :return:
         """
         #print("Row Clauses") # for testing
@@ -119,13 +141,14 @@ class SudokuParser(object):
                         literal2 = self.get_base_nine_num(i, l, d)
                         literals = '-{0} -{1} 0\n'.format(literal1, literal2)
                         line += literals
-        #TODO: Eventually output this to our cnf file
-        #print(line) # for testing
+                        self.no_of_clauses += 1
+        # print(line) # for testing
         outputCNFfile.write(line)
 
     def column_clause(self, outputCNFfile):
         """
 
+        :param outputCNFfile:
         :return:
         """
         line = ''
@@ -136,15 +159,16 @@ class SudokuParser(object):
                     for d in range(1, 10):
                         literal1 = self.get_base_nine_num(i, j, d)
                         literal2 = self.get_base_nine_num(i, l, d)
-                        line += '-' + str(literal1) \
-                                + ' ' + '-'+str(literal2) \
-                                + ' ' + str(0) + '\n'
-                    outputCNFfile.write(line)
-                    #print(line)
+                        literals = '-{0} -{1} 0\n'.format(literal1, literal2)
+                        line += literals
+                        self.no_of_clauses += 1
+        # print(line)  # for testing
+        outputCNFfile.write(line)
 
-    def sub_grid_clause(self, outputCNFfile):
+    def sub_grid_clause(self, output_cnf_file):
         """
 
+        :param output_cnf_file:
         :return:
         """
         # print("Sub Grid Clauses: ") # for testing
@@ -165,7 +189,10 @@ class SudokuParser(object):
                                     literals = "-{0} -{1} 0\n".format(lit1,
                                                                       lit2)
                                     line += literals
-        # print("first group: ", line) # for testing
+                                    self.no_of_clauses += 1
+        # print("first group: ", line)  # for testing
+        # output_cnf_file.write('first group: \n')
+        output_cnf_file.write(line)
 
         line = ''
         for d in range(1, 10):
@@ -186,9 +213,34 @@ class SudokuParser(object):
                                         literals = "-{0} -{1} 0\n".format(
                                             lit1, lit2)
                                         line += literals
-        # print("Second group: ", line) # for testing
+                                        self.no_of_clauses += 1
+        # print("Second group: ", line)  # for testing
+        output_cnf_file.write(line)
+
+    def create_minisat_input_file(self, tempfile, finalfile):
+        """
+
+        :param tempfile: contains just the cnf clauses
+        :param finalfile: contains no. of variables and clauses as well as
+        all cnf clauses
+        :return: none
+        """
+        ln = 'p cnf {var} {clauses}\n'.format(var=self.no_of_variables,
+                                              clauses=self.no_of_clauses)
+        finalfile.write(ln)
+        tempfile.flush()
+        tempfile.seek(0)
+        lines = tempfile.read()
+        finalfile.write(lines)
+        tempfile.close()
+        finalfile.close()
 
     def format_output(self, inputFile):
+        """
+
+        :param inputFile:
+        :return:
+        """
         result = []
         for line in infile:
             lines = line.split(' ')
@@ -202,21 +254,24 @@ class SudokuParser(object):
         return result
 
     def run_minisat(self, inputfile, outputfile):
+        """
+
+        :param inputfile:
+        :param outputfile:
+        :return:
+        """
         #TEMP VALUE REPLACE ./Minisat WITH PATH VARIABLE
-        #curdir = os.getcwd()
-        #minisatexe = curdir + "/MiniSat_v1.14_linux"
+        curdir = os.getcwd()
+        minisatexe = curdir + "/MiniSat_v1.14_linux"
         #print(minisatexe)
-        #call([minisatexe, inputfile, outputfile,])
+        call([minisatexe, inputfile, outputfile,])
         return
 
 # File for storing the CNF form
-tempinput = open('tempCNF.txt', 'w')
+tempinput = open('tempCNF.txt', 'r+')
 
 sudoku = SudokuParser()
-
 puzzle = sudoku.get_sudoku_puzzle()
-
-tempoutput = open('tempSAToutput.txt', 'a')
 
 # Encode Sudoku puzzle and write clauses to CNF File
 encoded = sudoku.encode(puzzle, tempinput)
@@ -225,12 +280,13 @@ sudoku.row_clause(tempinput)
 sudoku.column_clause(tempinput)
 sudoku.sub_grid_clause(tempinput)
 
+# Create final input file for MiniSat
+finalinput = open('FinalCNFClauses.txt', 'w')
+sudoku.create_minisat_input_file(tempinput, finalinput)
+
 # Run MiniSat to temp output file
-sudoku.run_minisat("tempCNF.txt", "tempSAToutput.txt")
-
-
-
-
+tempoutput = open('tempSAToutput.txt', 'a')
+sudoku.run_minisat("FinalCNFClauses.txt", "tempSAToutput.txt")
 
 outfile = open('output.txt', 'w')
 for item in encoded:    
