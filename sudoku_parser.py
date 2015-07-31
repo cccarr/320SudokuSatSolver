@@ -93,16 +93,17 @@ class SudokuParser(object):
         :return:
         """
         decoded = []
-        val = val - 1
+        val -= 1
         num = ((val % 81) % 9)
         col = (((val % 81) - num) / 9)
         row = ((val - col - num) / 81)
         k = num + 1
         j = col + 1
         i = row + 1
-        cell = str(i) + str(j)  
-        decoded.append(cell)
-        decoded.append(k)
+        #cell = str(i) + str(j)  
+	tup = (i, j, k)        
+	decoded.append(tup)
+        #decoded.append(k)
         return decoded
 
     def element_clauses(self, outputCNFfile):
@@ -255,7 +256,7 @@ class SudokuParser(object):
                 result.append(int(item))
         return result
 
-  #  def output_sudoku(self, result):
+    def output_sudoku(self, result, outputfile):
         """
 
         :param inputfile:
@@ -264,11 +265,37 @@ class SudokuParser(object):
         #remove negative
         #decode
 
-   #     print(result)
-    #    decoded = []
+        print(result)
+        decoded = []
 
-     #   for item in result:
-      #      decoded.extend(sudoku.decode(int(item))
+        for item in result:
+            decoded.extend(sudoku.decode(int(item)))
+
+        print(decoded)
+
+	i = 0
+	j = 0
+        k = 0
+	sudoku_row = "╔═══╦═══╦═══╦═══╦═══╦═══╦═══╦═══╦═══╗"
+        sudoku_values[8][8]
+	outputfile.writeline(sudoku_row)
+        #for value in decoded
+        #    if ((i % 2) == 1)
+        #        sudoku_values[j][k] = value
+        #        j++
+        #        if(j>8)
+        #            j = 0
+        #            k++
+ 
+        for item in decoded
+            row = item[0]
+            col = item[1]
+            val = item[2]
+            sudoku_values[row][col] = val
+
+        for(i=0 i>9 i++)
+               sudoku_row = "║ %d │ %d │ %d ║ %d │ %d │ %d ║ %d │ %d │ %d ║\n╠───┼───┼───╬───┼───┼───╬───┼───┼───╣"            
+                
 
 
     def run_minisat(self, inputfile, outputfile, minisatpath):
@@ -339,17 +366,7 @@ sudoku.run_minisat("FinalCNFClauses.txt", "tempSAToutput.txt", minisatpath)
 #    outputfile.write(str(item) + ' 0\n')
 result = sudoku.format_output(tempoutput)
 
-print(result)
-decoded = []
-
-for item in result:
-    decoded.extend(sudoku.decode(int(item))
-
-#print(decoded)
-
-
-
-#sudoku.output_sudoku(result)
+sudoku.output_sudoku(result, outputfile)
 
 #Read file
 #infile = open('exampleoutput.txt', 'r')
