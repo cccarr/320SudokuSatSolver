@@ -134,9 +134,9 @@ class SudokuParser(object):
         #print("Row Clauses") # for testing
         line = ''
         for i in range(1, 10):
-            for j in range(1, 9):
-                for l in range(j+1, 10):
-                    for d in range(1, 10):
+            for j in range(1, 10):
+                for d in range(1, 10):
+                    for l in range(j+1, 10):
                         literal1 = self.get_base_nine_num(i, j, d)
                         literal2 = self.get_base_nine_num(i, l, d)
                         literals = '-{0} -{1} 0\n'.format(literal1, literal2)
@@ -154,9 +154,8 @@ class SudokuParser(object):
         line = ''
         for i in range(1, 9):
             for j in range(1, 10):
-                for l in range(i+1, 10):
-                    line = ''
-                    for d in range(1, 10):
+                for d in range(1, 10):
+                    for l in range(i+1, 10):
                         literal1 = self.get_base_nine_num(i, j, d)
                         literal2 = self.get_base_nine_num(i, l, d)
                         literals = '-{0} -{1} 0\n'.format(literal1, literal2)
