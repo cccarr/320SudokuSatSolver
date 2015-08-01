@@ -9,11 +9,8 @@ class SudokuParser(object):
         self.no_of_variables = 0
         self.no_of_clauses = 0
 
+    #Check CommandLine for ouput filename and minisat path
     def get_minisat_path(self):
-        """
-        Check CommandLine for ouput filename and minisat path
-        :return:
-        """
         try:
             if len(sys.argv[1]) > 1:
                 file_name = sys.argv[1]
@@ -44,11 +41,9 @@ class SudokuParser(object):
 
         return (file_name, output_file, minisat_path)
 
+    #Gets sudoku puzzle from file and handles wildcard characters
     def get_sudoku_puzzle(self, filename):
-        """
-
-        :return:
-        """
+  
         try:
             file = open(filename)
         except:
@@ -70,38 +65,26 @@ class SudokuParser(object):
         return puzzle
 
 
-
+    #Converts value to base 9
     def get_base_nine_num(self, row, col, val):
-        """
-
-        :param row:
-        :param col:
-        :param val:
-        :return:
-        """
+      
         if val == 0:
             return 0
 
         digit = 81*(row-1)+9*(col-1)+(val-1)+1
         return digit
 
+    #Creates variable table
     def create_variable_table(self):
-        """
-
-        :return:
-        """
+    
         rows = '123456789'
         cols = '123456789'
         cells = [row + column for row in rows for column in cols]
         return cells
 
+    #Encodes values from unsolved sudoku
     def encode(self, puzzle, output_cnf_file):
-        """
 
-        :param puzzle:
-        :param output_cnf_file:
-        :return:
-        """
         table = self.create_variable_table()
         encoded = []
         line = ''
@@ -119,12 +102,9 @@ class SudokuParser(object):
         output_cnf_file.write(line)
         return encoded
 
+    #Decodes SAT output into a tuple (row,col,value)
     def decode(self, val):
-        """
 
-        :param val:
-        :return:
-        """
         decoded = []
         val -= 1
         num = ((val % 81) % 9)
@@ -136,16 +116,11 @@ class SudokuParser(object):
         #cell = str(i) + str(j)
         tup = (i, j, k)
         decoded.append(tup)
-        #decoded.append(k)
         return decoded
 
+    #Adds Element clauses to CNF Form
     def element_clauses(self, outputCNFfile):
-        """
 
-        :param outputCNFfile:
-        :return:
-        """
-        #print("Element Clauses") # for testing
         line = ''
         for i in range(1, 10):
             for j in range(1, 10):
@@ -156,16 +131,11 @@ class SudokuParser(object):
                     line += new_val
                 line += '0\n'
                 self.no_of_clauses += 1
-        #print(line) # for testing
         outputCNFfile.write(line)
 
+    #Adds Row clauses to CNF Form
     def row_clause(self, outputCNFfile):
-        """
 
-        :param outputCNFfile:
-        :return:
-        """
-        #print("Row Clauses") # for testing
         line = ''
         for i in range(1, 10):
             for j in range(1, 10):
@@ -176,15 +146,11 @@ class SudokuParser(object):
                         literals = '-{0} -{1} 0\n'.format(literal1, literal2)
                         line += literals
                         self.no_of_clauses += 1
-        # print(line) # for testing
         outputCNFfile.write(line)
 
+    #Adds column clauses to CNF Form
     def column_clause(self, outputCNFfile):
-        """
 
-        :param outputCNFfile:
-        :return:
-        """
         line = ''
         for i in range(1, 10):
             for j in range(1, 10):
@@ -198,13 +164,9 @@ class SudokuParser(object):
         # print(line)  # for testing
         outputCNFfile.write(line)
 
+    #Adds 3x3 clauses to CNF Form
     def sub_grid_clause(self, output_cnf_file):
-        """
 
-        :param output_cnf_file:
-        :return:
-        """
-        # print("Sub Grid Clauses: ") # for testing
         line = ''
         for d in range(1, 10):
                 for a in range(0, 3):
@@ -223,8 +185,6 @@ class SudokuParser(object):
                                                                       lit2)
                                     line += literals
                                     self.no_of_clauses += 1
-        # print("first group: ", line)  # for testing
-        # output_cnf_file.write('first group: \n')
         output_cnf_file.write(line)
 
         line = ''
@@ -247,17 +207,11 @@ class SudokuParser(object):
                                             lit1, lit2)
                                         line += literals
                                         self.no_of_clauses += 1
-        # print("Second group: ", line)  # for testing
         output_cnf_file.write(line)
 
+    #Create CNF form to input to MiniSAT
     def create_minisat_input_file(self, tempfile, finalfile):
-        """
-
-        :param tempfile: contains just the cnf clauses
-        :param finalfile: contains no. of variables and clauses as well as
-        all cnf clauses
-        :return: none
-        """
+ 
         ln = 'p cnf {var} {clauses}\n'.format(var=self.no_of_variables,clauses=self.no_of_clauses)
         finalfile.write(ln)
         tempfile.flush()
@@ -267,12 +221,9 @@ class SudokuParser(object):
         tempfile.close()
         finalfile.close()
 
+    #Format Output
     def format_output(self, inputFile):
-        """
 
-        :param inputFile:
-        :return:
-        """
         result = []
         inputFile.flush()
         inputFile.seek(0)
@@ -289,13 +240,9 @@ class SudokuParser(object):
                 result.append(int(item))
         return result
 
+    #Output Pretty Sudoku
     def output_sudoku(self, result, outputfile):
-        """
-
-        :param result:
-        :param outputfile:
-        :return:
-        """
+     
         decoded = []
 
         for item in result:
@@ -315,14 +262,9 @@ class SudokuParser(object):
                 cell_counter += 1
         outputfile.write(solved_puzzle)
 
+    #Run MiniSAT executable
     def run_minisat(self, inputfile, outputfile, minisatpath):
-        """
-        Runs the MiniSAT executable
-        :param inputfile: the file that minisat gets input from
-        :param outputfile: the temporary file that minisat outputs to
-        :param minisatpath: The path to the minisat executable
-        :return:
-        """
+
         try:
             call([minisatpath, inputfile, outputfile,])
         except:
