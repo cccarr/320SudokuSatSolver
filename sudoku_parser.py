@@ -1,3 +1,4 @@
+import os
 import sys
 from subprocess import call
 
@@ -327,7 +328,7 @@ class SudokuParser(object):
         except:
             print("MiniSAT path Invalid: Usage: sudoku_parser.py <inputfile> "
                   "<outputfile> <minisatpath>")
-           exit(1)
+            exit(1)
 
 # File for storing the CNF form
 tempinput = open('tempCNF.txt', 'r+')
@@ -348,11 +349,13 @@ sudoku.create_minisat_input_file(tempinput, finalinput)
 
 # Run MiniSat to temp output file
 tempoutput = open('tempSAToutput.txt', 'w+')
-finaloutputfile = open('SolvedSudokuPuzzle.txt', 'w')
 sudoku.run_minisat("FinalCNFClauses.txt", "tempSAToutput.txt", minisatpath)
 
+#Format Output
 result = sudoku.format_output(tempoutput)
-sudoku.output_sudoku(result, finaloutputfile)
+sudoku.output_sudoku(result, outputfile)
+
+
 
 
 
