@@ -1,6 +1,3 @@
-__author__ = 'Maryam Lantana'
-
-import os
 import sys
 from subprocess import call
 
@@ -11,12 +8,47 @@ class SudokuParser(object):
         self.no_of_variables = 0
         self.no_of_clauses = 0
 
+    def get_minisat_path(self):
+        """
+        Check CommandLine for ouput filename and minisat path
+        :return:
+        """
+        try:
+            if len(sys.argv[1]) > 1:
+                file_name = sys.argv[1]
+        except:
+            print("No Input File found: Usage: sudoku_parser.py <inputfile> "
+                  "<outputfile> <minisatpath>")
+            exit(1)
+        try:
+            if len(sys.argv[2]) > 1:
+                outfile = sys.argv[2]
+                try:
+                    output_file = open(outfile, 'w')
+                except:
+                    print("Output Filename Invalid: Usage: sudoku_parser.py "
+                          "<inputfile> <outputfile> <minisatpath>")
+                    exit(1)
+        except:
+            print("No Output File found: Usage: sudoku_parser.py <inputfile> "
+                  "<outputfile> <minisatpath>")
+            exit(1)
+        try:
+            if len(sys.argv[3]) >1:
+                minisat_path = sys.argv[3]
+        except:
+            print("MiniSAT path not found: Usage: sudoku_parser.py <inputfile> "
+                  "<outputfile> <minisatpath>")
+            exit(1)
+
+        return (file_name, output_file, minisat_path)
+
     def get_sudoku_puzzle(self, filename):
         """
 
         :return:
         """
-	try:
+        try:
             file = open(filename)
         except:
             print("Input Filename Invalid: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
@@ -97,12 +129,12 @@ class SudokuParser(object):
         num = ((val % 81) % 9)
         col = (((val % 81) - num) / 9)
         row = ((val - col - num) / 81)
-        k = num + 1
-        j = col + 1
-        i = row + 1
-        #cell = str(i) + str(j)  
-	tup = (i, j, k)        
-	decoded.append(tup)
+        k = int(num + 1)
+        j = int(col + 1)
+        i = int(row + 1)
+        #cell = str(i) + str(j)
+        tup = (i, j, k)
+        decoded.append(tup)
         #decoded.append(k)
         return decoded
 
@@ -249,7 +281,7 @@ class SudokuParser(object):
                 item = item.strip('\n')
                 if item == 'SAT':
                     continue
-		if item == 'UNSAT':
+                if item == 'UNSAT':
                     continue	
                 if int(item) <= 0:
                     continue
@@ -259,92 +291,49 @@ class SudokuParser(object):
     def output_sudoku(self, result, outputfile):
         """
 
-        :param inputfile:
+        :param result:
+        :param outputfile:
         :return:
         """
-        #remove negative
-        #decode
-
-        print(result)
         decoded = []
 
         for item in result:
             decoded.extend(sudoku.decode(int(item)))
 
-        print(decoded)
-
-	i = 0
-	j = 0
-        k = 0
-	sudoku_row = "╔═══╦═══╦═══╦═══╦═══╦═══╦═══╦═══╦═══╗"
-        sudoku_values[8][8]
-	outputfile.writeline(sudoku_row)
-        #for value in decoded
-        #    if ((i % 2) == 1)
-        #        sudoku_values[j][k] = value
-        #        j++
-        #        if(j>8)
-        #            j = 0
-        #            k++
- 
-        for item in decoded
-            row = item[0]
-            col = item[1]
+        sudoku_grid_start = "*---*---*---*---*---*---*---*---*---*\n"
+        solved_puzzle = sudoku_grid_start
+        cell_counter = 1
+        for item in decoded:
             val = item[2]
-            sudoku_values[row][col] = val
-
-        for(i=0 i>9 i++)
-               sudoku_row = "║ %d │ %d │ %d ║ %d │ %d │ %d ║ %d │ %d │ %d ║\n╠───┼───┼───╬───┼───┼───╬───┼───┼───╣"            
-                
-
+            if cell_counter % 9 == 0:
+                solved_puzzle += '| {} |\n'.format(val)
+                solved_puzzle += sudoku_grid_start
+                cell_counter += 1
+            else:
+                solved_puzzle += '| {} '.format(val)
+                cell_counter += 1
+        outputfile.write(solved_puzzle)
 
     def run_minisat(self, inputfile, outputfile, minisatpath):
         """
         Runs the MiniSAT executable
-        :param inputfile:   The name of the file that minisat gets input from
-        :param outputfile:  The name of the temporary file that minisat outputs to
-	:param minisatpath: The path to the minisat executable
+        :param inputfile: the file that minisat gets input from
+        :param outputfile: the temporary file that minisat outputs to
+        :param minisatpath: The path to the minisat executable
         :return:
         """
         try:
             call([minisatpath, inputfile, outputfile,])
         except:
-            print("MiniSAT path Invalid: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
-            exit(1)
-        return
-
-#Check CommandLine for ouput filename and minisat path
-try:
-    if (len(sys.argv[1]) > 1):
-        filename = sys.argv[1]
-except:
-    print("No Input File found: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
-    exit(1)
-try:
-    if (len(sys.argv[2]) > 1):
-        outfile = sys.argv[2]
-        try:
-            outputfile = open(outfile, 'w')
-        except:
-            print("Output Filename Invalid: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
-            exit(1)
-except:
-    print("No Output File found: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
-    exit(1)
-try:
-    if (len(sys.argv[3]) >1):
-        minisatpath = sys.argv[3]
-except:
-    print("MiniSAT path not found: Usage: sudoku_parser.py <inputfile> <outputfile> <minisatpath>")
-    exit(1)
+            print("MiniSAT path Invalid: Usage: sudoku_parser.py <inputfile> "
+                  "<outputfile> <minisatpath>")
+           exit(1)
 
 # File for storing the CNF form
 tempinput = open('tempCNF.txt', 'r+')
-
 sudoku = SudokuParser()
+filename, outputfile, minisatpath = sudoku.get_minisat_path()
 puzzle = sudoku.get_sudoku_puzzle(filename)
-
-
 
 # Encode Sudoku puzzle and write clauses to CNF File
 encoded = sudoku.encode(puzzle, tempinput)
@@ -359,17 +348,12 @@ sudoku.create_minisat_input_file(tempinput, finalinput)
 
 # Run MiniSat to temp output file
 tempoutput = open('tempSAToutput.txt', 'w+')
+finaloutputfile = open('SolvedSudokuPuzzle.txt', 'w')
 sudoku.run_minisat("FinalCNFClauses.txt", "tempSAToutput.txt", minisatpath)
 
-#outfile = open('output.txt', 'w')
-#for item in encoded:    
-#    outputfile.write(str(item) + ' 0\n')
 result = sudoku.format_output(tempoutput)
+sudoku.output_sudoku(result, finaloutputfile)
 
-sudoku.output_sudoku(result, outputfile)
-
-#Read file
-#infile = open('exampleoutput.txt', 'r')
 
 
 
