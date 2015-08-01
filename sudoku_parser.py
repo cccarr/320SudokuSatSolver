@@ -331,7 +331,7 @@ class SudokuParser(object):
             exit(1)
 
 # File for storing the CNF form
-tempinput = open('tempCNF.txt', 'r+')
+tempinput = open('tempCNF.txt', 'w+')
 sudoku = SudokuParser()
 filename, outputfile, minisatpath = sudoku.get_minisat_path()
 puzzle = sudoku.get_sudoku_puzzle(filename)
